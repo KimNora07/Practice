@@ -34,6 +34,7 @@ public class AstarTest : MonoBehaviour
     Node[,] NodeArray;
     Node StartNode, TargetNode, CurNode;
     List<Node> OpenList, ClosedList;
+    Collider2D detectCol;
 
     private void Update()
     {
@@ -65,7 +66,7 @@ public class AstarTest : MonoBehaviour
         if (player != null)
         {
             RaycastHit2D hit = Physics2D.Raycast(monster.position, player.transform.position - monster.position);
-            Collider2D detectCol = Physics2D.OverlapCircle(monster.position, detectSize, what);
+            detectCol = Physics2D.OverlapCircle(monster.position, detectSize, what);
             if (detectCol != null)
             {
                 if (hit.collider != null)
@@ -191,7 +192,21 @@ public class AstarTest : MonoBehaviour
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(monster.position, detectSize);
-        if (FinalNodeList.Count != 0) for (int i = 0; i < FinalNodeList.Count - 1; i++)
-                Gizmos.DrawLine(new Vector2(FinalNodeList[i].x, FinalNodeList[i].y), new Vector2(FinalNodeList[i + 1].x, FinalNodeList[i + 1].y));
+        if (FinalNodeList.Count != 0)
+        {
+            for (int i = 0; i < FinalNodeList.Count - 1; i++)
+            {
+                if (detectCol != null)
+                {
+                    Gizmos.color = Color.green;
+                    Gizmos.DrawLine(new Vector2(FinalNodeList[i].x, FinalNodeList[i].y), new Vector2(FinalNodeList[i + 1].x, FinalNodeList[i + 1].y));
+                }
+                else
+                {
+                    Gizmos.color = Color.red;
+                    Gizmos.DrawLine(new Vector2(FinalNodeList[i].x, FinalNodeList[i].y), new Vector2(FinalNodeList[i + 1].x, FinalNodeList[i + 1].y));
+                }
+            }
+        }
     }
 }
