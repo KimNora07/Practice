@@ -26,7 +26,6 @@ public class AstarTest : MonoBehaviour
     [SerializeField] private float moveSpeed = 3f;
 
     public float detectSize = 3f;
-    public int numGizmos = 10;
     private bool hasLineOfSight = false;
     public LayerMask what;
 
@@ -56,7 +55,12 @@ public class AstarTest : MonoBehaviour
                 Vector2 FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
                 monster.position = Vector2.MoveTowards(monster.position, FinalNodePos, moveSpeed * Time.deltaTime);
 
-                if ((Vector2)monster.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+
+
+                if ((Vector2)monster.position == FinalNodePos)
+                {
+                    FinalNodeList.RemoveAt(0);
+                }
             }
         }
     }
