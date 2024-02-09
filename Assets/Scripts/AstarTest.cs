@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using UnityEngine;
 
 [System.Serializable]
@@ -26,6 +27,8 @@ public class AstarTest : MonoBehaviour
     [SerializeField] private float moveSpeed = 3f;
 
     public float detectSize = 3f;
+    public float detectTime = 5f;
+    private bool firstDetect = false;
     private bool hasLineOfSight = false;
     public LayerMask what;
 
@@ -37,6 +40,8 @@ public class AstarTest : MonoBehaviour
 
     private void Update()
     {
+        Debug.Log((int)detectTime);
+
         startPos = Vector2Int.RoundToInt(monster.position);
         targetPos = Vector2Int.RoundToInt(player.position);
 
@@ -47,19 +52,63 @@ public class AstarTest : MonoBehaviour
 
         if (FinalNodeList.Count != 0)
         {
-            if (hasLineOfSight)
+            if (detectCol != null)
             {
-                //길찾기 성공시
-                if (FinalNodeList.Count == 1) return;
-
-                Vector2 FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
-                monster.position = Vector2.MoveTowards(monster.position, FinalNodePos, moveSpeed * Time.deltaTime);
-
-
-
-                if ((Vector2)monster.position == FinalNodePos)
+                if (hasLineOfSight)
                 {
-                    FinalNodeList.RemoveAt(0);
+                    //길찾기 성공시
+                    if (FinalNodeList.Count == 1) return;
+
+                    detectTime = 5f;
+                    firstDetect = true;
+                    Vector2 FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
+                    monster.position = Vector2.MoveTowards(monster.position, FinalNodePos, moveSpeed * Time.deltaTime);
+
+                    if ((Vector2)monster.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+                }
+                else
+                {
+                    if (detectTime <= 0)
+                    {
+                        firstDetect = false;
+                        return;
+                    }
+                    else
+                    {
+                        detectTime -= Time.deltaTime;
+                        if (FinalNodeList.Count == 1) return;
+
+                        Vector2 FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
+                        monster.position = Vector2.MoveTowards(monster.position, FinalNodePos, moveSpeed * Time.deltaTime);
+
+                        if ((Vector2)monster.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+                    }
+                }
+            }
+            else
+            {
+                if(firstDetect)
+                {
+
+                    if (detectTime <= 0)
+                    {
+                        firstDetect = false;
+                        return;
+                    }
+                    else
+                    {
+                        if (FinalNodeList.Count == 1) return;
+
+                        Vector2 FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
+                        monster.position = Vector2.MoveTowards(monster.position, FinalNodePos, moveSpeed * Time.deltaTime);
+
+                        if ((Vector2)monster.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+                        detectTime -= Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    return;
                 }
             }
         }
@@ -141,7 +190,7 @@ public class AstarTest : MonoBehaviour
                 FinalNodeList.Add(StartNode);
                 FinalNodeList.Reverse();
 
-                for (int i = 0; i < FinalNodeList.Count; i++) print(i + "번째는 " + FinalNodeList[i].x + ", " + FinalNodeList[i].y);
+                //for (int i = 0; i < FinalNodeList.Count; i++) print(i + "번째는 " + FinalNodeList[i].x + ", " + FinalNodeList[i].y);
                 return;
             }
 
