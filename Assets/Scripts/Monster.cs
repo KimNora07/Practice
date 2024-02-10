@@ -61,11 +61,25 @@ public class Monster : MonoBehaviour
                             firstDetect = false;
                             return;
                         }
-
-                        Debug.Log("4");
                         transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
 
                         if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+                    }
+                    else
+                    {
+                        if (firstDetect)
+                        {
+                            if (firstGizmo)
+                            {
+                                firstGizmo = false;
+                                firstDetect = false;
+                                Destroy(cloneGizmo);
+                                hasLineOfGizmo = false;
+                                hasLineOfSight = true;
+                                player = savePlayer;
+                                return;
+                            }
+                        }
                     }
                 }
                 else
@@ -90,16 +104,11 @@ public class Monster : MonoBehaviour
                                 firstDetect = false;
                                 return;
                             }
-
-                            Debug.Log("3");
                             transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
 
                             if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
                         }
-
                     }
-
-
                 }
             }
             else
@@ -124,7 +133,6 @@ public class Monster : MonoBehaviour
                             return;
                         }
 
-                        Debug.Log("1");
                         transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
 
                         if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
@@ -140,9 +148,9 @@ public class Monster : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (player != null)
+        if (savePlayer != null)
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, player.transform.position - transform.position);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, savePlayer.transform.position - transform.position);
             detectCol = Physics2D.OverlapCircle(transform.position, detectSize, what);
             if (detectCol != null)
             {
@@ -151,11 +159,11 @@ public class Monster : MonoBehaviour
                     hasLineOfSight = hit.collider.CompareTag("Player");
                     if (hasLineOfSight)
                     {
-                        Debug.DrawRay(transform.position, player.transform.position - transform.position, Color.green);
+                        Debug.DrawRay(transform.position, savePlayer.transform.position - transform.position, Color.green);
                     }
                     else
                     {
-                        Debug.DrawRay(transform.position, player.transform.position - transform.position, Color.red);
+                        Debug.DrawRay(transform.position, savePlayer.transform.position - transform.position, Color.red);
                     }
                 }
             }
