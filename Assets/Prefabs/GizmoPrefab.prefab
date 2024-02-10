@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1467180943146157814}
   - component: {fileID: 6528510287829341642}
   - component: {fileID: 1121513555543361364}
-  m_Layer: 31
+  m_Layer: 30
   m_Name: GizmoPrefab
   m_TagString: Gizmo
   m_Icon: {fileID: 0}
@@ -73,7 +73,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -2
+  m_SortingOrder: 0
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
