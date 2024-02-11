@@ -8,6 +8,10 @@ public class Player : MonoBehaviour
     
     private Rigidbody2D rb;
     private Vector2 moveDirection;
+    public float playerRadius = 5f;
+
+    public Collider2D[] detect;
+    public LayerMask whatIsDetect;
 
     private void Awake()
     {
@@ -24,6 +28,8 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         Move();
+        
+        
     }
 
     void Move()

@@ -12905,6 +12905,7 @@ GameObject:
   - component: {fileID: 1117108784}
   - component: {fileID: 1117108783}
   - component: {fileID: 1117108785}
+  - component: {fileID: 1117108786}
   m_Layer: 12
   m_Name: Player
   m_TagString: Player
@@ -12921,7 +12922,7 @@ Transform:
   m_GameObject: {fileID: 1117108781}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.87, y: 2.88, z: 0}
+  m_LocalPosition: {x: -0.05, y: 3.39, z: 0}
   m_LocalScale: {x: 1.25, y: 1.25, z: 1.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -13036,6 +13037,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: edd39c25030782b4c8af3f33ceaf87bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  moveSpeed: 5
+  playerRadius: 5
+  detect: []
+  whatIsDetect:
+    serializedVersion: 2
+    m_Bits: 8192
+--- !u!50 &1117108786
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1117108781}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!1 &1185173328
 GameObject:
   m_ObjectHideFlags: 0
@@ -13049,7 +13083,7 @@ GameObject:
   - component: {fileID: 1185173330}
   - component: {fileID: 1185173332}
   - component: {fileID: 1185173333}
-  m_Layer: 2
+  m_Layer: 13
   m_Name: Monster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -13065,7 +13099,7 @@ Transform:
   m_GameObject: {fileID: 1185173328}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.75, y: -3.88, z: 0}
+  m_LocalPosition: {x: 0.63, y: -3.47, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -13219,13 +13253,15 @@ MonoBehaviour:
   saveGizmo: {fileID: 2225800031122393034, guid: 511d623a8a940e84eab772efab031db9, type: 3}
   savePlayer: {fileID: 1117108782}
   moveSpeed: 3
-  detectSize: 10
+  detectSize: 3
   detectTime: 5
   firstDetect: 0
   firstGizmo: 0
+  hasLineOfSight: 0
+  hasLineOfGizmo: 0
   what:
     serializedVersion: 2
-    m_Bits: 1073745920
+    m_Bits: 0
   FinalNodePos: {x: 0, y: 0}
 --- !u!1 &2024539508
 GameObject:
