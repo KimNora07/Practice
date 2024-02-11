@@ -4,37 +4,32 @@ using UnityEngine;
 
 public class Monster : MonoBehaviour
 {
-    public Vector2Int bottomLeft, topRight, startPos, targetPos;
-    public List<Node> FinalNodeList;
-    public bool allowDiagonal, dontCrossCorner;
-    public Transform player;
-    public Transform gizmo;
-    public GameObject saveGizmo;
-    public Transform savePlayer;
-    private GameObject cloneGizmo;
-    [SerializeField] private float moveSpeed = 3f;
-
-    public float detectSize = 3f;
-    public float detectTime = 5f;
-    public bool firstDetect = false;
-    public bool firstGizmo = false;
-    public bool hasLineOfSight = false;
-    public bool hasLineOfGizmo = false;
-    public LayerMask what;
-
-    int sizeX, sizeY;
+    #region A* 알고리즘 변수
     Node[,] NodeArray;
     Node StartNode, TargetNode, CurNode;
     List<Node> OpenList, ClosedList;
     Collider2D detectCol;
-
+    int sizeX, sizeY;
     public Vector2 FinalNodePos;
+    public Vector2Int bottomLeft, topRight, startPos, targetPos;
+    public List<Node> FinalNodeList;
+    public bool allowDiagonal, dontCrossCorner;
+    #endregion
+
+    #region 적 로직 변수
+    public Transform player, gizmo, savePlayer;
+    public GameObject saveGizmo;
+    private GameObject cloneGizmo;
+    [SerializeField] private float moveSpeed = 3f;
+
+    public float detectSize = 3f;
+    public bool firstDetect = false, firstGizmo = false;
+    public bool hasLineOfSight = false, hasLineOfGizmo = false;
+    public LayerMask what;
+    #endregion
 
     private void Update()
     {
-        //Debug.Log((int)detectTime);
-        //Debug.Log("hasLineOfSight: " + hasLineOfSight);
-        //Debug.Log("hasLineOfGizmo: " + hasLineOfGizmo);
         startPos = Vector2Int.RoundToInt(transform.position);
         targetPos = Vector2Int.RoundToInt(player.position);
 
@@ -43,113 +38,30 @@ public class Monster : MonoBehaviour
 
         PathFinding();
 
-        if (FinalNodeList.Count > 1)
-        {
-            FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
-        }
-
-        if (FinalNodeList.Count != 0)
-        {
-            if (hasLineOfSight)
-            {
-                if (hasLineOfGizmo)
-                {
-                    Destroy(cloneGizmo);
-                    player = savePlayer;
-                    return;
-                }
-                else
-                {
-                    firstDetect = true;
-                    if (FinalNodeList.Count == 1)
-                    {
-                        firstDetect = false;
-                        return;
-                    }
-                    transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
-
-                    if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
-                }
-            }
-            else
-            {
-                if (hasLineOfGizmo)
-                {
-                    if (firstDetect)
-                    {
-                        if (firstGizmo)
-                        {
-                            if (FinalNodeList.Count == 1)
-                            {
-                                Destroy(cloneGizmo);
-                                player = savePlayer;
-                                firstDetect = false;
-                                return;
-                            }
-                            transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
-
-                            if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
-                        }
-                    }
-                }
-                else
-                {
-                    if(firstDetect)
-                    {
-                        if (firstGizmo)
-                        {
-                            if (FinalNodeList.Count == 1)
-                            {
-                                Destroy(cloneGizmo);
-                                player = savePlayer;
-                                firstDetect = false;
-                                return;
-                            }
-                            transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
-
-                            if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
-                        }
-                        else
-                        {
-                            cloneGizmo = Instantiate(saveGizmo, player.position, Quaternion.identity);
-                            player = cloneGizmo.transform;
-                            firstGizmo = true;
-                        }
-                    }
-                }
-            }
-        }
+        EnemyLogic();
     }
 
     private void FixedUpdate()
     {
-        if (savePlayer != null)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, savePlayer.transform.position - transform.position);
-            detectCol = Physics2D.OverlapCircle(transform.position, detectSize, what);
-
-            hasLineOfSight = (detectCol != null && hit.collider != null && hit.collider.CompareTag("Player"));
-
-            Debug.DrawRay(transform.position, savePlayer.transform.position - transform.position, hasLineOfSight ? Color.green : Color.red);
-
-        }
-
-        if (cloneGizmo != null)
-        {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, cloneGizmo.transform.position - transform.position);
-            hasLineOfGizmo = (hit.collider != null && hit.collider.CompareTag("Gizmo"));
-            Debug.DrawRay(transform.position, cloneGizmo.transform.position - transform.position, hasLineOfGizmo ? Color.green : Color.red);
-
-        }
-        else
-        {
-            hasLineOfGizmo = false;
-            firstGizmo = false;
-        }
-        Debug.Log(hasLineOfSight);
-        Debug.Log(hasLineOfGizmo);
+        rayLogic();
     }
 
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, detectSize);
+        if (FinalNodeList.Count != 0)
+        {
+            for (int i = 0; i < FinalNodeList.Count - 1; i++)
+            {
+                Color gizmoColor = (detectCol != null) ? Color.green : Color.red;
+                Gizmos.color = gizmoColor;
+                Gizmos.DrawLine(new Vector2(FinalNodeList[i].x, FinalNodeList[i].y), new Vector2(FinalNodeList[i + 1].x, FinalNodeList[i + 1].y));
+            }
+        }
+    }
+
+    #region A* 알고리즘 메소드
     public void PathFinding()
     {
         // NodeArray의 크기 정해주고, isWall, x, y 대입
@@ -252,19 +164,115 @@ public class Monster : MonoBehaviour
             }
         }
     }
+    #endregion
 
-    void OnDrawGizmos()
+    #region 적 로직 메소드
+    private void EnemyLogic()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, detectSize);
+        if (FinalNodeList.Count > 1)
+        {
+            FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
+        }
+
         if (FinalNodeList.Count != 0)
         {
-            for (int i = 0; i < FinalNodeList.Count - 1; i++)
+            if (hasLineOfSight)
             {
-                Color gizmoColor = (detectCol != null) ? Color.green : Color.red;
-                Gizmos.color = gizmoColor;
-                Gizmos.DrawLine(new Vector2(FinalNodeList[i].x, FinalNodeList[i].y), new Vector2(FinalNodeList[i + 1].x, FinalNodeList[i + 1].y));
+                if (hasLineOfGizmo)
+                {
+                    Destroy(cloneGizmo);
+                    player = savePlayer;
+                    firstDetect = false;
+                    return;
+                }
+                else
+                {
+                    firstDetect = true;
+                    if (FinalNodeList.Count == 1)
+                    {
+                        firstDetect = false;
+                        return;
+                    }
+                    transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
+
+                    if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+                }
+            }
+            else
+            {
+                if (hasLineOfGizmo)
+                {
+                    if (firstDetect)
+                    {
+                        if (firstGizmo)
+                        {
+                            if (FinalNodeList.Count == 1)
+                            {
+                                Destroy(cloneGizmo);
+                                player = savePlayer;
+                                firstDetect = false;
+                                return;
+                            }
+                            transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
+
+                            if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+                        }
+                    }
+                }
+                else
+                {
+                    if (firstDetect)
+                    {
+                        if (firstGizmo)
+                        {
+                            if (FinalNodeList.Count == 1)
+                            {
+                                Destroy(cloneGizmo);
+                                player = savePlayer;
+                                firstDetect = false;
+                                return;
+                            }
+                            transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
+
+                            if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
+                        }
+                        else
+                        {
+                            cloneGizmo = Instantiate(saveGizmo, player.position, Quaternion.identity);
+                            player = cloneGizmo.transform;
+                            firstGizmo = true;
+                        }
+                    }
+                }
             }
         }
     }
+
+    private void rayLogic()
+    {
+        if (savePlayer != null)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, savePlayer.transform.position - transform.position);
+            detectCol = Physics2D.OverlapCircle(transform.position, detectSize, what);
+
+            hasLineOfSight = (detectCol != null && hit.collider != null && hit.collider.CompareTag("Player"));
+
+            Debug.DrawRay(transform.position, savePlayer.transform.position - transform.position, hasLineOfSight ? Color.green : Color.red);
+
+        }
+
+        if (cloneGizmo != null)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, cloneGizmo.transform.position - transform.position);
+            hasLineOfGizmo = (hit.collider != null && hit.collider.CompareTag("Gizmo"));
+            Debug.DrawRay(transform.position, cloneGizmo.transform.position - transform.position, hasLineOfGizmo ? Color.green : Color.red);
+
+        }
+        else
+        {
+            hasLineOfGizmo = false;
+            firstGizmo = false;
+        }
+    }
+    #endregion
 }
