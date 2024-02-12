@@ -25,6 +25,7 @@ public class Monster : MonoBehaviour
     public int monsterMaxHp;
     public int monsterAtk;
     public float monsterDistance;
+    public float monsterAtkCoolTime = 3f;
 
     public Transform player, gizmo, savePlayer;
     public GameObject saveGizmo;
@@ -36,15 +37,21 @@ public class Monster : MonoBehaviour
     public bool hasLineOfSight = false, hasLineOfGizmo = false;
     public LayerMask what;
 
+    private Rigidbody2D rb;
+
 
     #endregion
-
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody2D>();
+    }
     private void Start()
     {
         monsterHp = monsterData.hp;
         monsterMaxHp = monsterData.maxHp;
         monsterAtk = monsterData.atk;
         monsterDistance = monsterData.distance;
+        monsterAtkCoolTime = monsterData.atkCoolTime;
 
         monsterHp = monsterMaxHp;
     }
@@ -190,7 +197,8 @@ public class Monster : MonoBehaviour
     #region 적 로직 메소드
     private void EnemyLogic()
     {
-        float distance = Vector2.Distance(savePlayer.position, transform.position);
+        float distance = Vector2.Distance(transform.position, savePlayer.position);
+
         if (FinalNodeList.Count > 1)
         {
             FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
@@ -215,14 +223,7 @@ public class Monster : MonoBehaviour
                         firstDetect = false;
                         return;
                     }
-                    if (distance <= monsterDistance)
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
-                    }
+                    transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
 
                     if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
                 }
@@ -306,5 +307,5 @@ public class Monster : MonoBehaviour
 
     #endregion
 
-    
+
 }

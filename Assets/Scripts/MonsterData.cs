@@ -13,4 +13,6 @@ public class MonsterData : ScriptableObject
     public int maxHp;
     public int atk;
     public float distance;
+    public float atkCoolTime;
+    public float sleepTime;
 }

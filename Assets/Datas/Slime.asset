@@ -18,3 +18,5 @@ MonoBehaviour:
   maxHp: 10
   atk: 2
   distance: 3
+  atkCoolTime: 3
+  sleepTime: 0
