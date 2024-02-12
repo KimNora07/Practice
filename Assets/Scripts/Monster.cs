@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
+using UnityEngine.UI;
 
 public class Monster : MonoBehaviour
 {
@@ -17,6 +19,13 @@ public class Monster : MonoBehaviour
     #endregion
 
     #region 적 로직 변수
+    public MonsterData monsterData;
+
+    public int monsterHp;
+    public int monsterMaxHp;
+    public int monsterAtk;
+    public float monsterDistance;
+
     public Transform player, gizmo, savePlayer;
     public GameObject saveGizmo;
     private GameObject cloneGizmo;
@@ -26,7 +35,19 @@ public class Monster : MonoBehaviour
     public bool firstDetect = false, firstGizmo = false;
     public bool hasLineOfSight = false, hasLineOfGizmo = false;
     public LayerMask what;
+
+
     #endregion
+
+    private void Start()
+    {
+        monsterHp = monsterData.hp;
+        monsterMaxHp = monsterData.maxHp;
+        monsterAtk = monsterData.atk;
+        monsterDistance = monsterData.distance;
+
+        monsterHp = monsterMaxHp;
+    }
 
     private void Update()
     {
@@ -43,7 +64,7 @@ public class Monster : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rayLogic();
+        RayLogic();
     }
 
     void OnDrawGizmos()
@@ -169,6 +190,7 @@ public class Monster : MonoBehaviour
     #region 적 로직 메소드
     private void EnemyLogic()
     {
+        float distance = Vector2.Distance(savePlayer.position, transform.position);
         if (FinalNodeList.Count > 1)
         {
             FinalNodePos = new Vector2(FinalNodeList[1].x, FinalNodeList[1].y);
@@ -193,7 +215,14 @@ public class Monster : MonoBehaviour
                         firstDetect = false;
                         return;
                     }
-                    transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
+                    if (distance <= monsterDistance)
+                    {
+                        return;
+                    }
+                    else
+                    {
+                        transform.position = Vector2.MoveTowards(transform.position, FinalNodePos, moveSpeed * Time.deltaTime);
+                    }
 
                     if ((Vector2)transform.position == FinalNodePos) FinalNodeList.RemoveAt(0);
                 }
@@ -248,7 +277,7 @@ public class Monster : MonoBehaviour
         }
     }
 
-    private void rayLogic()
+    private void RayLogic()
     {
         if (savePlayer != null)
         {
@@ -274,5 +303,8 @@ public class Monster : MonoBehaviour
             firstGizmo = false;
         }
     }
+
     #endregion
+
+    
 }
